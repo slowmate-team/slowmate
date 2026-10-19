@@ -10493,6 +10493,46 @@ html[data-slowmate-ready="false"] .app {
 
 
 
+<style id="mobile-fix-v1">
+@media (max-width:640px){
+  /* 장보기: 메뉴 조합 버튼(A/B)이 가로로 잘려 B가 안 보이던 문제 -> 줄바꿈·세로 배치 */
+  .shop-meal-pick{flex-wrap:wrap;overflow:visible;align-items:stretch}
+  .shop-meal-pick>span{flex:0 0 100%;margin:0 0 2px}
+  .shop-meal-pick button{flex:1 1 100%;min-width:0;white-space:normal;text-align:left;line-height:1.35}
+  /* 비교·대체: 제목과 단계 탭이 붙어 있던 간격 */
+  #pane-work h2{margin-bottom:10px}
+  #pane-work .wk-steps{margin-top:6px}
+}
+
+/* 카드 높이 흔들림 방지: '가격 변동 큰 재료'가 없는 카드도 같은 높이의 빈 칸을 확보 */
+#pane-meals .candidate-price-signal.is-empty::before{content:"가격 변동 큰 재료\A \A";white-space:pre;visibility:hidden;display:block}
+@media (min-width:641px){#pane-meals .candidate-menu{min-height:34px}
+#pane-meals .candidate-metrics>*{min-height:73px}}
+
+/* 키가 작은 폰: 첫 화면 제목 영역을 줄여 '식단 찾기' 버튼이 잘리지 않게 */
+@media (max-width:640px) and (max-height:780px){
+  #pane-setup .hero-copy h1{font-size:25px !important;line-height:1.2 !important;margin-bottom:8px}
+  #pane-setup .hero-copy .setup-purpose{display:none}
+  #pane-setup .setup-grid{gap:10px}
+}
+@media (max-width:640px) and (max-height:680px){
+  #pane-setup .hero-copy h1{font-size:22px !important;margin-bottom:6px}
+  #pane-setup .hero-copy>p:not(.setup-purpose){font-size:13px}
+  #pane-setup .form .form-head{margin-bottom:8px}
+}
+
+/* 브라우저 창이 작을 때(폭 약 640~1000px) 첫 화면이 잘리고 스크롤되지 않던 문제 */
+body:not(:has(#pane-catalog.active,#pane-shopping.active)) #pane-setup.active{overflow-y:auto !important;overflow-x:hidden !important;-webkit-overflow-scrolling:touch}
+
+/* 태블릿 폭의 '대체 재료 / 식단 요약' 전환 버튼: 다른 줄과 맞춰 왼쪽 정렬 */
+@media (min-width:641px){#pane-work .screen-section-switch{justify-content:flex-start}}
+
+/* 빈 상태 안내문: 어절 단위 줄바꿈 + 문장 단위 줄 구성 */
+.wk-empty p,.work-empty p,.v882-empty p,.gbox p{word-break:keep-all;overflow-wrap:break-word;text-wrap:balance;line-height:1.55}
+.wk-empty p .ln,.work-empty p .ln,.v882-empty p .ln,.gbox p .ln{display:block}
+.wk-empty p .ln+.ln,.work-empty p .ln+.ln,.v882-empty p .ln+.ln,.gbox p .ln+.ln{margin-top:0}
+.wk-empty p .ln:nth-child(2),.work-empty p .ln:nth-child(2),.v882-empty p .ln:nth-child(2),.gbox p .ln:nth-child(2){margin-bottom:6px}
+</style>
 </head>
 <body>
 <div class="app" inert aria-busy="true">
@@ -11400,7 +11440,7 @@ function tuneHTML(meal,p){const purpose=purposeOf(meal),opts=options(meal,purpos
 
 
 renderWork=function(){const host=document.getElementById('workBody'),p=typeof cardProfile!=='undefined'?cardProfile:null;const ms=[...WORK_SELECTION.values()];if(wkStep==='pick')chosenKey='';workPane.querySelector('.work-profile').textContent=p?p.sex+' · '+p.age_group+'세 · 1인분 기준':'';
- if(!ms.length||!p){host.innerHTML='<div class="work-empty wk-empty"><b>아직 고른 식단이 없어요</b><p>‘식단 찾기’에서 카드 왼쪽 위 체크박스로 1~2개를 골라 주세요.<br>1개를 고르면 재료를 바꿔볼 수 있고, 2개를 고르면 나란히 비교할 수 있어요.</p><button type="button" class="wk-choose" id="wkGoMeals">식단 찾기로 가기</button></div>';host.querySelector('#wkGoMeals').onclick=()=>switchTab('meals');return;}
+ if(!ms.length||!p){host.innerHTML='<div class="work-empty wk-empty"><b>아직 고른 식단이 없어요</b><p><span class="ln">‘식단 찾기’에서 카드 왼쪽 위 체크박스로</span><span class="ln">1~2개를 골라 주세요.</span><span class="ln">1개를 고르면 재료를 바꿔볼 수 있고,</span><span class="ln">2개를 고르면 나란히 비교할 수 있어요.</span></p><button type="button" class="wk-choose" id="wkGoMeals">식단 찾기로 가기</button></div>';host.querySelector('#wkGoMeals').onclick=()=>switchTab('meals');return;}
  if(!ms.some(m=>workMealKey(m)===chosenKey))chosenKey=ms.length===1?workMealKey(ms[0]):'';
  const chosen=ms.find(m=>workMealKey(m)===chosenKey);
  if(ms.length===1)wkStep='tune';
@@ -11661,7 +11701,7 @@ shopGroup=function(title,desc,rows,empty,tools=''){
 };
 function renderShopping(){
  const pane=document.getElementById('pane-shopping'),meals=shopMeals();
- if(!meals.length){pane.innerHTML='<div class="shop-page"><header class="shop-page-head"><div><div class="eyebrow">SHOPPING LIST</div><h2>장보기 목록</h2></div></header><div class="v882-empty"><b>아직 고른 식단이 없어요</b><p>‘식단 찾기’에서 카드의 ‘장보기 목록 보기’를 누르거나 체크박스로 1~2개를 골라 주세요.<br>필요한 재료와 구매 금액을 바로 볼 수 있어요.</p><button type="button" id="shopGoMeals">식단 찾기로 가기</button></div></div>';pane.querySelector('#shopGoMeals').onclick=()=>switchTab('meals');return;}
+ if(!meals.length){pane.innerHTML='<div class="shop-page"><header class="shop-page-head"><div><div class="eyebrow">SHOPPING LIST</div><h2>장보기 목록</h2></div></header><div class="v882-empty"><b>아직 고른 식단이 없어요</b><p><span class="ln">‘식단 찾기’에서 카드의 ‘장보기 목록 보기’를 누르거나</span><span class="ln">체크박스로 1~2개를 골라 주세요.</span><span class="ln">필요한 재료와 구매 금액을 바로 볼 수 있어요.</span></p><button type="button" id="shopGoMeals">식단 찾기로 가기</button></div></div>';pane.querySelector('#shopGoMeals').onclick=()=>switchTab('meals');return;}
  if(!meals.some(m=>workMealKey(m)===SHOP_MEAL_KEY))SHOP_MEAL_KEY=workMealKey(meals[0]);
  const meal=meals.find(m=>workMealKey(m)===SHOP_MEAL_KEY)||meals[0],rows=shoppingRows(meal);shopInitOwned(rows);
  const ready=rows.filter(x=>x.ready),pending=rows.filter(x=>!x.ready),owned=rows.filter(shopOwned),buy=rows.filter(x=>!shopOwned(x)),allCheckout=ready.reduce((s,x)=>s+x.checkout,0),extraCheckout=ready.filter(x=>!shopOwned(x)).reduce((s,x)=>s+x.checkout,0),used=ready.reduce((s,x)=>s+x.used,0),changed=rows.filter(x=>x.from?.size).length,changedMiss=rows.filter(x=>x.from?.size&&!x.ready).length;
